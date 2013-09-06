@@ -32,6 +32,7 @@ module.exports = function(grunt) {
             '<%= dirs.src %>/utils/EventTarget.js',
             '<%= dirs.src %>/utils/Detector.js',
             '<%= dirs.src %>/utils/Polyk.js',
+            '<%= dirs.src %>/time/Time.js',
             '<%= dirs.src %>/renderers/webgl/utils/WebGLShaderUtils.js',
             '<%= dirs.src %>/renderers/webgl/shaders/PixiShader.js',
             '<%= dirs.src %>/renderers/webgl/shaders/PixiFastShader.js',

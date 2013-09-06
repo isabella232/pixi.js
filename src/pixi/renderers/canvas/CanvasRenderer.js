@@ -214,6 +214,8 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
     {
         PIXI.Texture.frameUpdates.length = 0;
     }
+
+	PIXI.Time.update();
 };
 
 /**

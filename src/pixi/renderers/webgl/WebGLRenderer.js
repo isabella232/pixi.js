@@ -225,6 +225,8 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
         }
     }
 
+	PIXI.Time.update();
+
     /*
     //can simulate context loss in Chrome like so:
      this.view.onmousedown = function(ev) {
