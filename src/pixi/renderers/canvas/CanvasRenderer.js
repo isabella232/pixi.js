@@ -13,7 +13,7 @@
  * @param [view] {HTMLCanvasElement} the canvas to use as a view, optional
  * @param [transparent=false] {Boolean} the transparency of the render view, default false
  */
-PIXI.CanvasRenderer = function(width, height, view, transparent)
+PIXI.CanvasRenderer = function(width, height, view, transparent, targetFrameRate, minFrameRate )
 {
     PIXI.defaultRenderer = PIXI.defaultRenderer || this;
 
@@ -129,6 +129,18 @@ PIXI.CanvasRenderer = function(width, height, view, transparent)
      */
     this.context = this.view.getContext( "2d", { alpha: this.transparent } );
 
+
+	
+	/**
+	 * time is an instance if Time. It will be used to cap the framerate of MovieClip's it can also be used to
+	 * perform framerate independent programmatic animations.
+	 *
+	 * @property time
+	 * @type {Time}
+	 */
+	this.time = new PIXI.Time( targetFrameRate, minFrameRate );
+
+
     this.refresh = true;
     // hack to enable some hardware acceleration!
     //this.view.style["transform"] = "translatez(0)";
@@ -181,6 +193,7 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
     PIXI.texturesToUpdate.length = 0;
     PIXI.texturesToDestroy.length = 0;
 
+	stage.time = this.time;
     stage.updateTransform();
 
     this.context.setTransform(1,0,0,1,0,0);
@@ -215,7 +228,7 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
         PIXI.Texture.frameUpdates.length = 0;
     }
 
-	PIXI.Time.update();
+	this.time.update();
 };
 
 /**

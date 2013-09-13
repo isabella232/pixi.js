@@ -60,6 +60,15 @@ PIXI.Stage = function(backgroundColor)
     //the stage is its own stage
     this.stage = this;
 
+	/**
+	 * time is an instance of the Time class. It can be used to perform frame independent animations.
+	 * This property will be set by the renderer during render.
+	 *
+	 * @property time
+	 * @type {Time}
+	 */	
+	this.time = null;
+
     //optimize hit detection a bit
     this.stage.hitArea = new PIXI.Rectangle(0,0,100000, 100000);
 
