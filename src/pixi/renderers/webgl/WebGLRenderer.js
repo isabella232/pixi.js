@@ -17,7 +17,9 @@ PIXI.glContexts = []; // this is where we store the webGL contexts for easy acce
  * @param view {HTMLCanvasElement} the canvas to use as a view, optional
  * @param transparent=false {Boolean} If the render view is transparent, default false
  * @param antialias=false {Boolean} sets antialias (only applicable in chrome at the moment)
- *
+ * @param targetFrameRate {Number}=60 target framerate for MovieClip animations and other time based animations
+ * @param minFrameRate {Number}=12 minimum framerate update for MovieClips and other time based animations
+ * 
  */
 PIXI.WebGLRenderer = function(width, height, view, transparent, antialias, targetFrameRate, minFrameRate )
 {
