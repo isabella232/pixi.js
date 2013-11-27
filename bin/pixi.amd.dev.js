@@ -4559,9 +4559,6 @@ PIXI._defaultFrame = new PIXI.Rectangle(0,0,1,1);
 // only one at the moment :/
 PIXI.gl;
 
-// Cache the event so we aren't creating a new object every frame.
-PIXI.WebGLRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
-
 /**
  * the WebGLRenderer is draws the stage and all its content onto a webGL enabled canvas. This renderer
  * should be used for browsers support webGL. This Render works by automatically managing webGLBatchs.
@@ -4645,6 +4642,9 @@ PIXI.WebGLRenderer = function(width, height, view, transparent, antialias, targe
 
     this.stageRenderGroup = new PIXI.WebGLRenderGroup(this.gl);
 }
+
+// Cache the event so we aren't creating a new object every frame.
+PIXI.WebGLRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
 
 // constructor
 PIXI.WebGLRenderer.prototype.constructor = PIXI.WebGLRenderer;
