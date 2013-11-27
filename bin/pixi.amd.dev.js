@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-09-13
+ * Compiled: 2013-11-27
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -3121,6 +3121,73 @@ PIXI.InteractionData.prototype.getLocalPosition = function(displayObject)
 PIXI.InteractionData.prototype.constructor = PIXI.InteractionData;
 
 /**
+ * https://github.com/mrdoob/eventtarget.js/
+ * THankS mr DOob!
+ */
+
+/**
+ * Adds event emitter functionality to a class
+ *
+ * @class EventTarget
+ * @example
+ *		function MyEmitter() {
+ *			PIXI.EventTarget.call(this); //mixes in event target stuff
+ *		}
+ *
+ *		var em = new MyEmitter();
+ *		em.emit({ type: 'eventName', data: 'some data' });
+ */
+PIXI.EventTarget = function () {
+
+	var listeners = {};
+	
+	this.addEventListener = this.on = function ( type, listener ) {
+		
+		
+		if ( listeners[ type ] === undefined ) {
+
+			listeners[ type ] = [];
+			
+		}
+
+		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+
+			listeners[ type ].push( listener );
+		}
+
+	};
+
+	this.dispatchEvent = this.emit = function ( event ) {
+
+		if ( !listeners[ event.type ] || !listeners[ event.type ].length ) {
+
+			return;
+			
+		}
+		
+		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
+
+			listeners[ event.type ][ i ]( event );
+			
+		}
+
+	};
+
+	this.removeEventListener = this.off = function ( type, listener ) {
+
+		var index = listeners[ type ].indexOf( listener );
+
+		if ( index !== - 1 ) {
+
+			listeners[ type ].splice( index, 1 );
+
+		}
+
+	};
+
+};
+
+/**
  * @author Mat Groves http://matgroves.com/ @Doormat23
  */
 
@@ -3137,6 +3204,7 @@ PIXI.InteractionData.prototype.constructor = PIXI.InteractionData;
 PIXI.Stage = function(backgroundColor, interactive)
 {
 	PIXI.DisplayObjectContainer.call( this );
+	PIXI.EventTarget.call( this );
 
 	/**
 	 * [read-only] Current transform of the object based on world (parent) factors
@@ -3184,6 +3252,16 @@ PIXI.Stage = function(backgroundColor, interactive)
 
 	this.__childrenAdded = [];
 	this.__childrenRemoved = [];
+
+	/**
+	 * The onEnterFrame event is dispatched at the start of every render. The first
+	 * parameter is the delta time scale, to be mulitplied by your sprite's positions
+	 * for framerate-independent animation.
+	 * 
+	 * @event onEnterFrame
+	 * @param {Number} timeScale the time scale, calculated from delta
+	 */
+
 
 	//the stage is it's own stage
 	this.stage = this;
@@ -3407,73 +3485,6 @@ PIXI.runList = function(item)
 
 
 
-
-/**
- * https://github.com/mrdoob/eventtarget.js/
- * THankS mr DOob!
- */
-
-/**
- * Adds event emitter functionality to a class
- *
- * @class EventTarget
- * @example
- *		function MyEmitter() {
- *			PIXI.EventTarget.call(this); //mixes in event target stuff
- *		}
- *
- *		var em = new MyEmitter();
- *		em.emit({ type: 'eventName', data: 'some data' });
- */
-PIXI.EventTarget = function () {
-
-	var listeners = {};
-	
-	this.addEventListener = this.on = function ( type, listener ) {
-		
-		
-		if ( listeners[ type ] === undefined ) {
-
-			listeners[ type ] = [];
-			
-		}
-
-		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
-
-			listeners[ type ].push( listener );
-		}
-
-	};
-
-	this.dispatchEvent = this.emit = function ( event ) {
-
-		if ( !listeners[ event.type ] || !listeners[ event.type ].length ) {
-
-			return;
-			
-		}
-		
-		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
-
-			listeners[ event.type ][ i ]( event );
-			
-		}
-
-	};
-
-	this.removeEventListener = this.off = function ( type, listener ) {
-
-		var index = listeners[ type ].indexOf( listener );
-
-		if ( index !== - 1 ) {
-
-			listeners[ type ].splice( index, 1 );
-
-		}
-
-	};
-
-};
 
 /**
  * @author Mat Groves http://matgroves.com/ @Doormat23
@@ -4702,9 +4713,11 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
 		if(group)group.removeDisplayObject(stage.__childrenRemoved[i]);
 	}*/
 
+	stage.dispatchEvent("onEnterFrame");
+
 	// update any textures	
 	PIXI.WebGLRenderer.updateTextures();
-		
+	
 	// update the scene graph	
 	PIXI.visibleCount++;
 	stage.updateTransform();
@@ -6596,6 +6609,8 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
 
 	stage.time = this.time;
 	
+	stage.dispatchEvent("onEnterFrame");
+
 	// update textures if need be
 	PIXI.texturesToUpdate = [];
 	PIXI.texturesToDestroy = [];

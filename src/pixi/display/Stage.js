@@ -15,6 +15,7 @@
 PIXI.Stage = function(backgroundColor, interactive)
 {
 	PIXI.DisplayObjectContainer.call( this );
+	PIXI.EventTarget.call( this );
 
 	/**
 	 * [read-only] Current transform of the object based on world (parent) factors
@@ -62,6 +63,16 @@ PIXI.Stage = function(backgroundColor, interactive)
 
 	this.__childrenAdded = [];
 	this.__childrenRemoved = [];
+
+	/**
+	 * The onEnterFrame event is dispatched at the start of every render. The first
+	 * parameter is the delta time scale, to be mulitplied by your sprite's positions
+	 * for framerate-independent animation.
+	 * 
+	 * @event onEnterFrame
+	 * @param {Number} timeScale the time scale, calculated from delta
+	 */
+
 
 	//the stage is it's own stage
 	this.stage = this;

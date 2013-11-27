@@ -159,9 +159,11 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
 		if(group)group.removeDisplayObject(stage.__childrenRemoved[i]);
 	}*/
 
+	stage.dispatchEvent("onEnterFrame");
+
 	// update any textures	
 	PIXI.WebGLRenderer.updateTextures();
-		
+	
 	// update the scene graph	
 	PIXI.visibleCount++;
 	stage.updateTransform();
