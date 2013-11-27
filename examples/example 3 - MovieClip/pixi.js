@@ -4564,6 +4564,9 @@ PIXI._defaultFrame = new PIXI.Rectangle(0,0,1,1);
 // only one at the moment :/
 PIXI.gl;
 
+// Cache the event so we aren't creating a new object every frame.
+PIXI.WebGLRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
+
 /**
  * the WebGLRenderer is draws the stage and all its content onto a webGL enabled canvas. This renderer
  * should be used for browsers support webGL. This Render works by automatically managing webGLBatchs.
@@ -4715,7 +4718,7 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
 		if(group)group.removeDisplayObject(stage.__childrenRemoved[i]);
 	}*/
 
-	stage.dispatchEvent(({type: "onEnterFrame"}));
+	stage.dispatchEvent(PIXI.WebGLRenderer.ONENTERFRAME_EVENT);
 
 	// update any textures	
 	PIXI.WebGLRenderer.updateTextures();
@@ -6525,6 +6528,7 @@ PIXI.WebGLRenderGroup.prototype.initStrip = function(strip)
  */
 
 
+
 /**
  * the CanvasRenderer draws the stage and all its content onto a 2d canvas. This renderer should be used for browsers that do not support webGL.
  * Dont forget to add the view to your DOM or you will not see anything :)
@@ -6597,6 +6601,9 @@ PIXI.CanvasRenderer = function(width, height, view, transparent, targetFrameRate
 // constructor
 PIXI.CanvasRenderer.prototype.constructor = PIXI.CanvasRenderer;
 
+// Cache the event so we aren't creating a new object every frame.
+PIXI.CanvasRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
+
 /**
  * Renders the stage to its canvas view
  *
@@ -6611,7 +6618,7 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
 
 	stage.time = this.time;
 	
-	stage.dispatchEvent(({type: "onEnterFrame"}));
+	stage.dispatchEvent(PIXI.CanvasRenderer.ONENTERFRAME_EVENT);
 
 	// update textures if need be
 	PIXI.texturesToUpdate = [];

@@ -3,6 +3,7 @@
  */
 
 
+
 /**
  * the CanvasRenderer draws the stage and all its content onto a 2d canvas. This renderer should be used for browsers that do not support webGL.
  * Dont forget to add the view to your DOM or you will not see anything :)
@@ -75,6 +76,9 @@ PIXI.CanvasRenderer = function(width, height, view, transparent, targetFrameRate
 // constructor
 PIXI.CanvasRenderer.prototype.constructor = PIXI.CanvasRenderer;
 
+// Cache the event so we aren't creating a new object every frame.
+PIXI.CanvasRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
+
 /**
  * Renders the stage to its canvas view
  *
@@ -89,7 +93,7 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
 
 	stage.time = this.time;
 	
-	stage.dispatchEvent(({type: "onEnterFrame"}));
+	stage.dispatchEvent(PIXI.CanvasRenderer.ONENTERFRAME_EVENT);
 
 	// update textures if need be
 	PIXI.texturesToUpdate = [];
