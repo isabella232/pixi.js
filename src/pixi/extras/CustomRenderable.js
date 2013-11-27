@@ -14,6 +14,8 @@ PIXI.CustomRenderable = function()
 {
 	PIXI.DisplayObject.call( this );
 	
+	this.visible = true;
+	this.renderable = true;
 }
 
 // constructor

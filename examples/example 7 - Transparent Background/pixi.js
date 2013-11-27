@@ -2515,7 +2515,7 @@ PIXI.InteractionManager.prototype.collectInteractiveSprite = function(displayObj
 				//child.__iParent = iParent;
 				this.interactiveItems.push(child);
 
-				if(child.children.length > 0)
+				if(child.children && child.children.length > 0)
 				{
 					this.collectInteractiveSprite(child, child);
 				}
@@ -2524,7 +2524,7 @@ PIXI.InteractionManager.prototype.collectInteractiveSprite = function(displayObj
 			{
 				child.__iParent = null;
 
-				if(child.children.length > 0)
+				if(child.children && child.children.length > 0)
 				{
 					this.collectInteractiveSprite(child, iParent);
 				}
@@ -4564,8 +4564,6 @@ PIXI._defaultFrame = new PIXI.Rectangle(0,0,1,1);
 // only one at the moment :/
 PIXI.gl;
 
-// Cache the event so we aren't creating a new object every frame.
-PIXI.WebGLRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
 
 /**
  * the WebGLRenderer is draws the stage and all its content onto a webGL enabled canvas. This renderer
@@ -4654,6 +4652,8 @@ PIXI.WebGLRenderer = function(width, height, view, transparent, antialias, targe
 // constructor
 PIXI.WebGLRenderer.prototype.constructor = PIXI.WebGLRenderer;
 
+// Cache the event so we aren't creating a new object every frame.
+PIXI.WebGLRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
 /**
  * Gets a new WebGLBatch from the pool
  *
@@ -9223,6 +9223,8 @@ PIXI.CustomRenderable = function()
 {
 	PIXI.DisplayObject.call( this );
 	
+	this.visible = true;
+	this.renderable = true;
 }
 
 // constructor
