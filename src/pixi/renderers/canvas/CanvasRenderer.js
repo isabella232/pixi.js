@@ -89,6 +89,8 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
 
 	stage.time = this.time;
 	
+	stage.dispatchEvent("onEnterFrame");
+
 	// update textures if need be
 	PIXI.texturesToUpdate = [];
 	PIXI.texturesToDestroy = [];

@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-09-13
+ * Compiled: 2013-11-27
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -3126,6 +3126,73 @@ PIXI.InteractionData.prototype.getLocalPosition = function(displayObject)
 PIXI.InteractionData.prototype.constructor = PIXI.InteractionData;
 
 /**
+ * https://github.com/mrdoob/eventtarget.js/
+ * THankS mr DOob!
+ */
+
+/**
+ * Adds event emitter functionality to a class
+ *
+ * @class EventTarget
+ * @example
+ *		function MyEmitter() {
+ *			PIXI.EventTarget.call(this); //mixes in event target stuff
+ *		}
+ *
+ *		var em = new MyEmitter();
+ *		em.emit({ type: 'eventName', data: 'some data' });
+ */
+PIXI.EventTarget = function () {
+
+	var listeners = {};
+	
+	this.addEventListener = this.on = function ( type, listener ) {
+		
+		
+		if ( listeners[ type ] === undefined ) {
+
+			listeners[ type ] = [];
+			
+		}
+
+		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+
+			listeners[ type ].push( listener );
+		}
+
+	};
+
+	this.dispatchEvent = this.emit = function ( event ) {
+
+		if ( !listeners[ event.type ] || !listeners[ event.type ].length ) {
+
+			return;
+			
+		}
+		
+		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
+
+			listeners[ event.type ][ i ]( event );
+			
+		}
+
+	};
+
+	this.removeEventListener = this.off = function ( type, listener ) {
+
+		var index = listeners[ type ].indexOf( listener );
+
+		if ( index !== - 1 ) {
+
+			listeners[ type ].splice( index, 1 );
+
+		}
+
+	};
+
+};
+
+/**
  * @author Mat Groves http://matgroves.com/ @Doormat23
  */
 
@@ -3142,6 +3209,7 @@ PIXI.InteractionData.prototype.constructor = PIXI.InteractionData;
 PIXI.Stage = function(backgroundColor, interactive)
 {
 	PIXI.DisplayObjectContainer.call( this );
+	PIXI.EventTarget.call( this );
 
 	/**
 	 * [read-only] Current transform of the object based on world (parent) factors
@@ -3189,6 +3257,16 @@ PIXI.Stage = function(backgroundColor, interactive)
 
 	this.__childrenAdded = [];
 	this.__childrenRemoved = [];
+
+	/**
+	 * The onEnterFrame event is dispatched at the start of every render. The first
+	 * parameter is the delta time scale, to be mulitplied by your sprite's positions
+	 * for framerate-independent animation.
+	 * 
+	 * @event onEnterFrame
+	 * @param {Number} timeScale the time scale, calculated from delta
+	 */
+
 
 	//the stage is it's own stage
 	this.stage = this;
@@ -3414,73 +3492,6 @@ PIXI.runList = function(item)
 
 
 /**
- * https://github.com/mrdoob/eventtarget.js/
- * THankS mr DOob!
- */
-
-/**
- * Adds event emitter functionality to a class
- *
- * @class EventTarget
- * @example
- *		function MyEmitter() {
- *			PIXI.EventTarget.call(this); //mixes in event target stuff
- *		}
- *
- *		var em = new MyEmitter();
- *		em.emit({ type: 'eventName', data: 'some data' });
- */
-PIXI.EventTarget = function () {
-
-	var listeners = {};
-	
-	this.addEventListener = this.on = function ( type, listener ) {
-		
-		
-		if ( listeners[ type ] === undefined ) {
-
-			listeners[ type ] = [];
-			
-		}
-
-		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
-
-			listeners[ type ].push( listener );
-		}
-
-	};
-
-	this.dispatchEvent = this.emit = function ( event ) {
-
-		if ( !listeners[ event.type ] || !listeners[ event.type ].length ) {
-
-			return;
-			
-		}
-		
-		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
-
-			listeners[ event.type ][ i ]( event );
-			
-		}
-
-	};
-
-	this.removeEventListener = this.off = function ( type, listener ) {
-
-		var index = listeners[ type ].indexOf( listener );
-
-		if ( index !== - 1 ) {
-
-			listeners[ type ].splice( index, 1 );
-
-		}
-
-	};
-
-};
-
-/**
  * @author Mat Groves http://matgroves.com/ @Doormat23
  */
 
@@ -3496,10 +3507,12 @@ PIXI.EventTarget = function () {
  * @param view {Canvas} the canvas to use as a view, optional
  * @param transparent=false {Boolean} the transparency of the render view, default false
  * @param antialias=false {Boolean} sets antialias (only applicable in webGL chrome at the moment)
+ * @param targetFrameRate {Number}=60 target framerate for MovieClip animations and other time based animations
+ * @param minFrameRate {Number}=12 minimum framerate update for MovieClips and other time based animations
  * 
  * antialias
  */
-PIXI.autoDetectRenderer = function(width, height, view, transparent, antialias)
+PIXI.autoDetectRenderer = function(width, height, view, transparent, antialias, targetFrameRate, minFrameRate )
 {
 	if(!width)width = 800;
 	if(!height)height = 600;
@@ -3510,10 +3523,10 @@ PIXI.autoDetectRenderer = function(width, height, view, transparent, antialias)
 	//console.log(webgl);
 	if( webgl )
 	{
-		return new PIXI.WebGLRenderer(width, height, view, transparent, antialias);
+		return new PIXI.WebGLRenderer(width, height, view, transparent, antialias, targetFrameRate, minFrameRate );
 	}
 
-	return	new PIXI.CanvasRenderer(width, height, view, transparent);
+	return new PIXI.CanvasRenderer(width, height, view, transparent, targetFrameRate, minFrameRate );
 };
 
 
@@ -4567,6 +4580,8 @@ PIXI.gl;
  * @param view {Canvas} the canvas to use as a view, optional
  * @param transparent=false {Boolean} the transparency of the render view, default false
  * @param antialias=false {Boolean} sets antialias (only applicable in chrome at the moment)
+ * @param targetFrameRate {Number}=60 target framerate for MovieClip animations and other time based animations
+ * @param minFrameRate {Number}=12 minimum framerate update for MovieClips and other time based animations
  * 
  */
 PIXI.WebGLRenderer = function(width, height, view, transparent, antialias, targetFrameRate, minFrameRate )
@@ -4703,9 +4718,11 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
 		if(group)group.removeDisplayObject(stage.__childrenRemoved[i]);
 	}*/
 
+	stage.dispatchEvent("onEnterFrame");
+
 	// update any textures	
 	PIXI.WebGLRenderer.updateTextures();
-		
+	
 	// update the scene graph	
 	PIXI.visibleCount++;
 	stage.updateTransform();
@@ -6521,6 +6538,9 @@ PIXI.WebGLRenderGroup.prototype.initStrip = function(strip)
  * @param height=0 {Number} the height of the canvas view
  * @param view {Canvas} the canvas to use as a view, optional
  * @param transparent=false {Boolean} the transparency of the render view, default false
+ * @param targetFrameRate {Number}=60 target framerate for MovieClip animations and other time based animations
+ * @param minFrameRate {Number}=12 minimum framerate update for MovieClips and other time based animations
+ *
  */
 PIXI.CanvasRenderer = function(width, height, view, transparent, targetFrameRate, minFrameRate )
 {
@@ -6594,6 +6614,8 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
 
 	stage.time = this.time;
 	
+	stage.dispatchEvent("onEnterFrame");
+
 	// update textures if need be
 	PIXI.texturesToUpdate = [];
 	PIXI.texturesToDestroy = [];
