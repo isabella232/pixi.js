@@ -65,12 +65,9 @@ PIXI.Stage = function(backgroundColor, interactive)
 	this.__childrenRemoved = [];
 
 	/**
-	 * The onEnterFrame event is dispatched at the start of every render. The first
-	 * parameter is the delta time scale, to be mulitplied by your sprite's positions
-	 * for framerate-independent animation.
+	 * The onEnterFrame event is dispatched at the start of every render. 
 	 * 
 	 * @event onEnterFrame
-	 * @param {Number} timeScale the time scale, calculated from delta
 	 */
 
 

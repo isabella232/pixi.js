@@ -3259,12 +3259,9 @@ PIXI.Stage = function(backgroundColor, interactive)
 	this.__childrenRemoved = [];
 
 	/**
-	 * The onEnterFrame event is dispatched at the start of every render. The first
-	 * parameter is the delta time scale, to be mulitplied by your sprite's positions
-	 * for framerate-independent animation.
+	 * The onEnterFrame event is dispatched at the start of every render. 
 	 * 
 	 * @event onEnterFrame
-	 * @param {Number} timeScale the time scale, calculated from delta
 	 */
 
 
@@ -4718,7 +4715,7 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
 		if(group)group.removeDisplayObject(stage.__childrenRemoved[i]);
 	}*/
 
-	stage.dispatchEvent("onEnterFrame");
+	stage.dispatchEvent(({type: "onEnterFrame"}));
 
 	// update any textures	
 	PIXI.WebGLRenderer.updateTextures();
@@ -6614,7 +6611,7 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
 
 	stage.time = this.time;
 	
-	stage.dispatchEvent("onEnterFrame");
+	stage.dispatchEvent(({type: "onEnterFrame"}));
 
 	// update textures if need be
 	PIXI.texturesToUpdate = [];
