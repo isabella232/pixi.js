@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-11-27
+ * Compiled: 2013-11-29
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -6740,6 +6740,7 @@ PIXI.CanvasRenderer.prototype.renderDisplayObject = function(displayObject)
 		}
 		else if(displayObject instanceof PIXI.CustomRenderable)
 		{
+			context.setTransform(transform[0], transform[3], transform[1], transform[4], transform[2], transform[5]);
 			displayObject.renderCanvas(this);
 		}
 		else if(displayObject instanceof PIXI.Graphics)

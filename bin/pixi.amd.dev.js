@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-11-27
+ * Compiled: 2013-11-29
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -2971,7 +2971,7 @@ PIXI.InteractionManager.prototype.onTouchStart = function(event)
 		{
 			var item = this.interactiveItems[j];
 			
-			if(item.touchstart || item.tap || item.touchend)
+			if(item.touchstart || item.tap)
 			{
 				item.__hit = this.hitTest(item, touchData);
 				
@@ -4559,6 +4559,7 @@ PIXI._defaultFrame = new PIXI.Rectangle(0,0,1,1);
 // only one at the moment :/
 PIXI.gl;
 
+
 /**
  * the WebGLRenderer is draws the stage and all its content onto a webGL enabled canvas. This renderer
  * should be used for browsers support webGL. This Render works by automatically managing webGLBatchs.
@@ -4642,9 +4643,6 @@ PIXI.WebGLRenderer = function(width, height, view, transparent, antialias, targe
 
     this.stageRenderGroup = new PIXI.WebGLRenderGroup(this.gl);
 }
-
-// Cache the event so we aren't creating a new object every frame.
-PIXI.WebGLRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
 
 // constructor
 PIXI.WebGLRenderer.prototype.constructor = PIXI.WebGLRenderer;
@@ -6737,6 +6735,7 @@ PIXI.CanvasRenderer.prototype.renderDisplayObject = function(displayObject)
 		}
 		else if(displayObject instanceof PIXI.CustomRenderable)
 		{
+			context.setTransform(transform[0], transform[3], transform[1], transform[4], transform[2], transform[5]);
 			displayObject.renderCanvas(this);
 		}
 		else if(displayObject instanceof PIXI.Graphics)
