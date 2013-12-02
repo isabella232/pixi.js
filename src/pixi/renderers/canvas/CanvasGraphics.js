@@ -34,6 +34,12 @@ PIXI.CanvasGraphics.renderGraphics = function(graphics, context)
 		
 		context.strokeStyle = color = '#' + ('00000' + ( data.lineColor | 0).toString(16)).substr(-6);
 
+
+		var gradientFill = this.getGradient(data.gradientFill, context);
+
+		//Not yet implemented
+		//var gradientStroke = this.getGradient(data.gradientFill);
+
 		context.lineWidth = data.lineWidth;
 		
 		if(data.type == PIXI.Graphics.POLY)
@@ -56,7 +62,10 @@ PIXI.CanvasGraphics.renderGraphics = function(graphics, context)
 			if(data.fill)
 			{
 				context.globalAlpha = data.fillAlpha * worldAlpha;
-				context.fillStyle = color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+				
+				color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+				context.fillStyle = gradientFill || color;
+				
       			context.fill();
 			}
 			if(data.lineWidth)
@@ -71,7 +80,10 @@ PIXI.CanvasGraphics.renderGraphics = function(graphics, context)
 			if(data.fillColor || data.fillColor === 0)
 			{
 				context.globalAlpha = data.fillAlpha * worldAlpha;
-				context.fillStyle = color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+
+				color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+				context.fillStyle = gradientFill || color;
+				
 				context.fillRect(points[0], points[1], points[2], points[3]);
 				
 			}
@@ -92,7 +104,10 @@ PIXI.CanvasGraphics.renderGraphics = function(graphics, context)
 			if(data.fill)
 			{
 				context.globalAlpha = data.fillAlpha * worldAlpha;
-				context.fillStyle = color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+				
+				color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+				context.fillStyle = gradientFill || color;
+				
       			context.fill();
 			}
 			if(data.lineWidth)
@@ -135,7 +150,12 @@ PIXI.CanvasGraphics.renderGraphics = function(graphics, context)
 			if(data.fill)
 			{
 				context.globalAlpha = data.fillAlpha * worldAlpha;
-				context.fillStyle = color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+
+				
+				
+				color = '#' + ('00000' + ( data.fillColor | 0).toString(16)).substr(-6);
+				context.fillStyle = gradientFill || color;
+
       			context.fill();
 			}
 			if(data.lineWidth)
@@ -147,6 +167,29 @@ PIXI.CanvasGraphics.renderGraphics = function(graphics, context)
       	
 	};
 }
+
+// PIXI.CanvasGraphics.getCachedGradient = function(type, args) {
+	
+// };
+
+PIXI.CanvasGraphics.getGradient = function(grd, context) {
+	if (!grd)
+		return null;
+
+	var gradientObj;
+	if (grd.linear) {
+		gradientObj = context.createLinearGradient(grd.x1, grd.y1, grd.x2, grd.y2);
+		
+	} else {
+		gradientObj = context.createRadialGradient(grd.cx1, grd.cy1, grd.radius1, 
+												   grd.cx2, grd.cy2, grd.radius2);
+	}
+	for (var i=0; i<grd.colors.length; i++) {
+		var gcolor = grd.colors[i];
+		gradientObj.addColorStop(gcolor[0], gcolor[1]);
+	}
+	return gradientObj;
+};
 
 /*
  * Renders a graphics mask

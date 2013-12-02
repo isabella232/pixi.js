@@ -51,6 +51,8 @@ PIXI.Graphics = function()
      */
 	this.graphicsData = [];
 
+    this.gradientFill = null;
+
     /**
      * Current path
      *
@@ -82,6 +84,7 @@ PIXI.Graphics.prototype.lineStyle = function(lineWidth, color, alpha)
 	this.lineAlpha = (alpha == undefined) ? 1 : alpha;
 	
 	this.currentPath = {lineWidth:this.lineWidth, lineColor:this.lineColor, lineAlpha:this.lineAlpha, 
+                        gradientFill:this.gradientFill,
 						fillColor:this.fillColor, fillAlpha:this.fillAlpha, fill:this.filling, points:[], type:PIXI.Graphics.POLY};
 	
 	this.graphicsData.push(this.currentPath);
@@ -99,6 +102,7 @@ PIXI.Graphics.prototype.moveTo = function(x, y)
 	if(this.currentPath.points.length == 0)this.graphicsData.pop();
 	
 	this.currentPath = this.currentPath = {lineWidth:this.lineWidth, lineColor:this.lineColor, lineAlpha:this.lineAlpha, 
+                        gradientFill:this.gradientFill,
 						fillColor:this.fillColor, fillAlpha:this.fillAlpha, fill:this.filling, points:[], type:PIXI.Graphics.POLY};
 	
 	this.currentPath.points.push(x, y);
@@ -120,6 +124,40 @@ PIXI.Graphics.prototype.lineTo = function(x, y)
 	this.dirty = true;
 }
 
+PIXI.Graphics.prototype.beginLinearGradientFill = function(x1, y1, x2, y2, colors, alpha) 
+{
+    this.gradientFill = {
+        linear: true,
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2,
+        colors: colors || []
+    };
+    this.filling = true;
+    this.fillColor = 0;
+    this.fillAlpha = (alpha == undefined) ? 1 : alpha;
+}
+
+
+PIXI.Graphics.prototype.beginRadialGradientFill = function(cx1, cy1, radius1, cx2, cy2, radius2, colors, alpha) 
+{
+    this.gradientFill = {
+        linear: false,
+        cx1: cx1,
+        cy1: cy1,
+        cx2: cx2,
+        cy2: cy2,
+        radius1: radius1,
+        radius2: radius2,
+        colors: colors || []
+    };
+    this.filling = true;
+    this.fillColor = 0;
+    this.fillAlpha = (alpha == undefined) ? 1 : alpha;
+}
+
+
 /**
  * Specifies a simple one-color fill that subsequent calls to other Graphics methods
  * (such as lineTo() or drawCircle()) use when drawing.
@@ -129,7 +167,8 @@ PIXI.Graphics.prototype.lineTo = function(x, y)
  * @param alpha {Number} the alpha
  */
 PIXI.Graphics.prototype.beginFill = function(color, alpha)
-{
+{   
+    this.gradientFill = null;
 	this.filling = true;
 	this.fillColor = color || 0;
 	this.fillAlpha = (alpha == undefined) ? 1 : alpha;
@@ -143,6 +182,7 @@ PIXI.Graphics.prototype.beginFill = function(color, alpha)
 PIXI.Graphics.prototype.endFill = function()
 {
 	this.filling = false;
+    this.gradientFill = null;
 	this.fillColor = null;
 	this.fillAlpha = 1;
 }
@@ -161,6 +201,7 @@ PIXI.Graphics.prototype.drawRect = function( x, y, width, height )
 	
 	this.currentPath = {lineWidth:this.lineWidth, lineColor:this.lineColor, lineAlpha:this.lineAlpha, 
 						fillColor:this.fillColor, fillAlpha:this.fillAlpha, fill:this.filling, 
+                        gradientFill:this.gradientFill,
 						points:[x, y, width, height], type:PIXI.Graphics.RECT};
 						
 	this.graphicsData.push(this.currentPath);
@@ -181,6 +222,7 @@ PIXI.Graphics.prototype.drawCircle = function( x, y, radius)
 	
 	this.currentPath = {lineWidth:this.lineWidth, lineColor:this.lineColor, lineAlpha:this.lineAlpha, 
 						fillColor:this.fillColor, fillAlpha:this.fillAlpha, fill:this.filling, 
+                        gradientFill:this.gradientFill,
 						points:[x, y, radius, radius], type:PIXI.Graphics.CIRC};
 						
 	this.graphicsData.push(this.currentPath);
@@ -202,6 +244,7 @@ PIXI.Graphics.prototype.drawElipse = function( x, y, width, height)
 	
 	this.currentPath = {lineWidth:this.lineWidth, lineColor:this.lineColor, lineAlpha:this.lineAlpha, 
 						fillColor:this.fillColor, fillAlpha:this.fillAlpha, fill:this.filling, 
+                        gradientFill:this.gradientFill,
 						points:[x, y, width, height], type:PIXI.Graphics.ELIP};
 						
 	this.graphicsData.push(this.currentPath);
