@@ -64,7 +64,9 @@ PIXI.JsonLoader.prototype.load = function () {
 	this.ajaxRequest = new AjaxRequest();
 	var scope = this;
 	this.ajaxRequest.onreadystatechange = function () {
+
 		scope.onJSONLoaded();
+
 	};
 
 	this.ajaxRequest.open("GET", this.url, true);
@@ -92,9 +94,6 @@ PIXI.JsonLoader.prototype.onJSONLoaded = function () {
 				var frameData = this.json.frames;
 
 				this.texture = image.texture.baseTexture;
-				image.addEventListener("loaded", function (event) {
-					scope.onLoaded();
-				});
 
 				for (var i in frameData) {
 					var rect = frameData[i].frame;
@@ -123,8 +122,11 @@ PIXI.JsonLoader.prototype.onJSONLoaded = function () {
 					}
 				}
 
+				image.addEventListener("loaded", function (event) {
+					scope.onLoaded();
+				});
+				
 				image.load();
-
 			}
 			else if(this.json.bones)
 			{

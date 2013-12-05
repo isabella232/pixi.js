@@ -10700,10 +10700,11 @@ PIXI.texturesToDestroy = [];
  * @constructor
  * @param source {String} the source object (image or canvas)
  */
-PIXI.BaseTexture = function(source)
+PIXI.BaseTexture = function(source, imageUrl)
 {
 	PIXI.EventTarget.call( this );
 
+			
 	/**
 	 * [read-only] The width of the base texture set when the image has loaded
 	 *
@@ -10739,26 +10740,30 @@ PIXI.BaseTexture = function(source)
 	 */
 	this.source = source;
 
-	this.imageUrl = null;
+	this.imageUrl = imageUrl;
 
 	if(!source)return;
 
 	if(this.source instanceof Image || this.source instanceof HTMLImageElement)
 	{
-		if(this.source.complete)
-		{
-			this.hasLoaded = true;
-			this.width = this.source.width;
-			this.height = this.source.height;
+		// if(this.source.complete)
+		// {
+		// 	this.hasLoaded = true;
+		// 	this.width = this.source.width;
+		// 	this.height = this.source.height;
 
-			PIXI.texturesToUpdate.push(this);
-			// this.dispatchEvent( { type: 'loaded', content: this } );
-		}
-		else
-		{
+		// 	PIXI.texturesToUpdate.push(this);
+		// 	this.dispatchEvent( { type: 'loaded', content: this } );
+		// }
+		// else
+		// {
+
+			if (!this.imageUrl)
+				console.warn("No image URL for", texture);
 
 			var scope = this;
 			this.source.onload = function(){
+
 				if (!scope || !scope.source) {
 					console.warn("No longer have ref to", scope.imageUrl)
 					return;
@@ -10771,8 +10776,9 @@ PIXI.BaseTexture = function(source)
 				PIXI.texturesToUpdate.push(scope);
 				scope.dispatchEvent( { type: 'loaded', content: scope } );
 			}
-			//	this.image.src = imageUrl;
-		}
+			this.source.src = this.imageUrl;
+
+		// }
 	}
 	else
 	{
@@ -10802,7 +10808,8 @@ PIXI.BaseTexture.prototype.destroy = function()
 		// if (this.source.src && this.source.src in PIXI.BaseTextureCache)
 		if (this.imageUrl in PIXI.BaseTextureCache)
 			delete PIXI.BaseTextureCache[this.imageUrl];
-		this.source.src = null;
+		this.source.onload = null;
+		// this.source.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 	}
 	this.source = null;
 	PIXI.texturesToDestroy.push(this);
@@ -10819,6 +10826,7 @@ PIXI.BaseTexture.prototype.destroy = function()
  */
 PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 {
+	
 	var baseTexture = PIXI.BaseTextureCache[imageUrl];
 	if(!baseTexture)
 	{
@@ -10829,8 +10837,7 @@ PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 		{
 			image.crossOrigin = '';
 		}
-		image.src = imageUrl;
-		baseTexture = new PIXI.BaseTexture(image);
+		baseTexture = new PIXI.BaseTexture(image, imageUrl);
 		baseTexture.imageUrl = imageUrl;
 		PIXI.BaseTextureCache[imageUrl] = baseTexture;
 	}
@@ -10986,7 +10993,7 @@ PIXI.Texture.prototype.setFrame = function(frame)
 PIXI.Texture.fromImage = function(imageUrl, crossorigin)
 {
 	var texture = PIXI.TextureCache[imageUrl];
-
+	
 	if(!texture)
 	{
 		texture = new PIXI.Texture(PIXI.BaseTexture.fromImage(imageUrl, crossorigin));
@@ -11051,8 +11058,10 @@ PIXI.Texture.addTextureToCache = function(texture, id)
  */
 PIXI.Texture.removeTextureFromCache = function(id)
 {
-	var texture = PIXI.TextureCache[id]
-	PIXI.TextureCache[id] = null;
+	if (id in PIXI.TextureCache) {
+		var texture = PIXI.TextureCache[id];
+		delete PIXI.TextureCache[id];
+	}
 	return texture;
 }
 
@@ -11523,7 +11532,9 @@ PIXI.JsonLoader.prototype.load = function () {
 	this.ajaxRequest = new AjaxRequest();
 	var scope = this;
 	this.ajaxRequest.onreadystatechange = function () {
+
 		scope.onJSONLoaded();
+
 	};
 
 	this.ajaxRequest.open("GET", this.url, true);
@@ -11551,9 +11562,6 @@ PIXI.JsonLoader.prototype.onJSONLoaded = function () {
 				var frameData = this.json.frames;
 
 				this.texture = image.texture.baseTexture;
-				image.addEventListener("loaded", function (event) {
-					scope.onLoaded();
-				});
 
 				for (var i in frameData) {
 					var rect = frameData[i].frame;
@@ -11582,8 +11590,11 @@ PIXI.JsonLoader.prototype.onJSONLoaded = function () {
 					}
 				}
 
+				image.addEventListener("loaded", function (event) {
+					scope.onLoaded();
+				});
+				
 				image.load();
-
 			}
 			else if(this.json.bones)
 			{

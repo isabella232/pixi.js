@@ -14,10 +14,11 @@ PIXI.texturesToDestroy = [];
  * @constructor
  * @param source {String} the source object (image or canvas)
  */
-PIXI.BaseTexture = function(source)
+PIXI.BaseTexture = function(source, imageUrl)
 {
 	PIXI.EventTarget.call( this );
 
+			
 	/**
 	 * [read-only] The width of the base texture set when the image has loaded
 	 *
@@ -53,26 +54,30 @@ PIXI.BaseTexture = function(source)
 	 */
 	this.source = source;
 
-	this.imageUrl = null;
+	this.imageUrl = imageUrl;
 
 	if(!source)return;
 
 	if(this.source instanceof Image || this.source instanceof HTMLImageElement)
 	{
-		if(this.source.complete)
-		{
-			this.hasLoaded = true;
-			this.width = this.source.width;
-			this.height = this.source.height;
+		// if(this.source.complete)
+		// {
+		// 	this.hasLoaded = true;
+		// 	this.width = this.source.width;
+		// 	this.height = this.source.height;
 
-			PIXI.texturesToUpdate.push(this);
-			// this.dispatchEvent( { type: 'loaded', content: this } );
-		}
-		else
-		{
+		// 	PIXI.texturesToUpdate.push(this);
+		// 	this.dispatchEvent( { type: 'loaded', content: this } );
+		// }
+		// else
+		// {
+
+			if (!this.imageUrl)
+				console.warn("No image URL for", texture);
 
 			var scope = this;
 			this.source.onload = function(){
+
 				if (!scope || !scope.source) {
 					console.warn("No longer have ref to", scope.imageUrl)
 					return;
@@ -85,8 +90,9 @@ PIXI.BaseTexture = function(source)
 				PIXI.texturesToUpdate.push(scope);
 				scope.dispatchEvent( { type: 'loaded', content: scope } );
 			}
-			//	this.image.src = imageUrl;
-		}
+			this.source.src = this.imageUrl;
+
+		// }
 	}
 	else
 	{
@@ -116,7 +122,8 @@ PIXI.BaseTexture.prototype.destroy = function()
 		// if (this.source.src && this.source.src in PIXI.BaseTextureCache)
 		if (this.imageUrl in PIXI.BaseTextureCache)
 			delete PIXI.BaseTextureCache[this.imageUrl];
-		this.source.src = null;
+		this.source.onload = null;
+		// this.source.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 	}
 	this.source = null;
 	PIXI.texturesToDestroy.push(this);
@@ -133,6 +140,7 @@ PIXI.BaseTexture.prototype.destroy = function()
  */
 PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 {
+	
 	var baseTexture = PIXI.BaseTextureCache[imageUrl];
 	if(!baseTexture)
 	{
@@ -143,8 +151,7 @@ PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 		{
 			image.crossOrigin = '';
 		}
-		image.src = imageUrl;
-		baseTexture = new PIXI.BaseTexture(image);
+		baseTexture = new PIXI.BaseTexture(image, imageUrl);
 		baseTexture.imageUrl = imageUrl;
 		PIXI.BaseTextureCache[imageUrl] = baseTexture;
 	}
