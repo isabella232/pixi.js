@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-12-02
+ * Compiled: 2013-12-06
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -3172,7 +3172,7 @@ PIXI.EventTarget = function () {
 		
 		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
 
-			listeners[ event.type ][ i ]( event );
+			listeners[ event.type ][ i ].apply( this, Array.prototype.slice.call( arguments ) );
 			
 		}
 
@@ -6609,8 +6609,9 @@ PIXI.CanvasRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
  *
  * @method render
  * @param stage {Stage} the Stage element to be rendered
+ * @param dt {Number} Delta time in ms
  */
-PIXI.CanvasRenderer.prototype.render = function(stage)
+PIXI.CanvasRenderer.prototype.render = function(stage, dt)
 {
 	
 	//stage.__childrenAdded = [];
@@ -6618,7 +6619,7 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
 
 	stage.time = this.time;
 	
-	stage.dispatchEvent(PIXI.CanvasRenderer.ONENTERFRAME_EVENT);
+	stage.dispatchEvent(PIXI.CanvasRenderer.ONENTERFRAME_EVENT, dt);
 
 	// update textures if need be
 	PIXI.texturesToUpdate = [];
