@@ -9491,7 +9491,6 @@ PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 		{
 			image.crossOrigin = '';
 		}
-		console.warn("CREATING NEW IMAGE", imageUrl);
 		image.src = imageUrl;
 		baseTexture = new PIXI.BaseTexture(image);
 		PIXI.BaseTextureCache[imageUrl] = baseTexture;
