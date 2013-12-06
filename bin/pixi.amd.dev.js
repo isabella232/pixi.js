@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-12-02
+ * Compiled: 2013-12-06
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -1648,6 +1648,9 @@ PIXI.Sprite = function(texture)
 	}
 
 	this.renderable = true;
+
+	// this.anchor.x = texture.anchor.x;
+	// this.anchor.y = texture.anchor.y;
 }
 
 // constructor
@@ -1710,8 +1713,8 @@ PIXI.Sprite.prototype.setTexture = function(texture)
 		this.texture = texture;
 	}
 	
-	this.anchor.x = texture.anchor.x;
-	this.anchor.y = texture.anchor.y;
+	// this.anchor.x = texture.anchor.x;
+	// this.anchor.y = texture.anchor.y;
 
 	this.updateFrame = true;
 }
@@ -3167,7 +3170,7 @@ PIXI.EventTarget = function () {
 		
 		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
 
-			listeners[ event.type ][ i ].apply( this, Array.prototype.slice.call( arguments ) );
+			listeners[ event.type ][ i ]( event );
 			
 		}
 
@@ -6604,17 +6607,16 @@ PIXI.CanvasRenderer.ONENTERFRAME_EVENT = {type: "onEnterFrame"};
  *
  * @method render
  * @param stage {Stage} the Stage element to be rendered
- * @param dt {Number} Delta time in ms
  */
-PIXI.CanvasRenderer.prototype.render = function(stage, dt)
+PIXI.CanvasRenderer.prototype.render = function(stage)
 {
 	
 	//stage.__childrenAdded = [];
 	//stage.__childrenRemoved = [];
 
 	stage.time = this.time;
-
-	stage.dispatchEvent(PIXI.CanvasRenderer.ONENTERFRAME_EVENT, dt);
+	
+	stage.dispatchEvent(PIXI.CanvasRenderer.ONENTERFRAME_EVENT);
 
 	// update textures if need be
 	PIXI.texturesToUpdate = [];
@@ -9474,6 +9476,7 @@ PIXI.BaseTexture.prototype.destroy = function()
 PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 {
 	var baseTexture = PIXI.BaseTextureCache[imageUrl];
+
 	if(!baseTexture)
 	{
 		// new Image() breaks tex loading in some versions of Chrome.
@@ -9483,6 +9486,7 @@ PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 		{
 			image.crossOrigin = '';
 		}
+		console.warn("CREATING NEW IMAGE", imageUrl);
 		image.src = imageUrl;
 		baseTexture = new PIXI.BaseTexture(image);
 		PIXI.BaseTextureCache[imageUrl] = baseTexture;

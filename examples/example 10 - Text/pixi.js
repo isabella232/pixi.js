@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-12-02
+ * Compiled: 2013-12-06
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -1653,6 +1653,9 @@ PIXI.Sprite = function(texture)
 	}
 
 	this.renderable = true;
+
+	// this.anchor.x = texture.anchor.x;
+	// this.anchor.y = texture.anchor.y;
 }
 
 // constructor
@@ -1715,8 +1718,8 @@ PIXI.Sprite.prototype.setTexture = function(texture)
 		this.texture = texture;
 	}
 	
-	this.anchor.x = texture.anchor.x;
-	this.anchor.y = texture.anchor.y;
+	// this.anchor.x = texture.anchor.x;
+	// this.anchor.y = texture.anchor.y;
 
 	this.updateFrame = true;
 }
@@ -9478,6 +9481,7 @@ PIXI.BaseTexture.prototype.destroy = function()
 PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 {
 	var baseTexture = PIXI.BaseTextureCache[imageUrl];
+
 	if(!baseTexture)
 	{
 		// new Image() breaks tex loading in some versions of Chrome.
@@ -9487,6 +9491,7 @@ PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 		{
 			image.crossOrigin = '';
 		}
+		console.warn("CREATING NEW IMAGE", imageUrl);
 		image.src = imageUrl;
 		baseTexture = new PIXI.BaseTexture(image);
 		PIXI.BaseTextureCache[imageUrl] = baseTexture;
