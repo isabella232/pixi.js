@@ -77,6 +77,9 @@ PIXI.Sprite = function(texture)
 	}
 
 	this.renderable = true;
+
+	// this.anchor.x = texture.anchor.x;
+	// this.anchor.y = texture.anchor.y;
 }
 
 // constructor
@@ -139,8 +142,8 @@ PIXI.Sprite.prototype.setTexture = function(texture)
 		this.texture = texture;
 	}
 	
-	this.anchor.x = texture.anchor.x;
-	this.anchor.y = texture.anchor.y;
+	// this.anchor.x = texture.anchor.x;
+	// this.anchor.y = texture.anchor.y;
 
 	this.updateFrame = true;
 }

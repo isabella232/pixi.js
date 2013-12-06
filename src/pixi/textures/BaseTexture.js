@@ -123,6 +123,7 @@ PIXI.BaseTexture.prototype.destroy = function()
 PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 {
 	var baseTexture = PIXI.BaseTextureCache[imageUrl];
+
 	if(!baseTexture)
 	{
 		// new Image() breaks tex loading in some versions of Chrome.
