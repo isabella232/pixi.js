@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-12-06
+ * Compiled: 2013-12-09
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -2703,6 +2703,8 @@ PIXI.InteractionManager.prototype.onMouseMove = function(event)
 	// TODO optimize by not check EVERY TIME! maybe half as often? //
 	var rect = this.interactionDOMElement.getBoundingClientRect();
 	
+	if (!this.target) return;
+
 	this.mouse.global.x = (event.clientX - rect.left) * (this.target.width / rect.width);
 	this.mouse.global.y = (event.clientY - rect.top) * ( this.target.height / rect.height);
 	
