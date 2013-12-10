@@ -45,7 +45,7 @@ PIXI.EventTarget = function () {
 		
 		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
 
-			listeners[ event.type ][ i ].apply( this, Array.prototype.slice.call( arguments, 1 ) );
+			listeners[ event.type ][ i ].apply( this, Array.prototype.slice.call( arguments ) );
 			
 		}
 

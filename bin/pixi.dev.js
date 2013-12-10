@@ -4,7 +4,7 @@
  * Copyright (c) 2012, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2013-12-09
+ * Compiled: 2013-12-10
  *
  * Pixi.JS is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -3177,7 +3177,7 @@ PIXI.EventTarget = function () {
 		
 		for(var i = 0, l = listeners[ event.type ].length; i < l; i++) {
 
-			listeners[ event.type ][ i ].apply( this, Array.prototype.slice.call( arguments, 1 ) );
+			listeners[ event.type ][ i ].apply( this, Array.prototype.slice.call( arguments ) );
 			
 		}
 
