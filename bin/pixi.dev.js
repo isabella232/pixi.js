@@ -2857,8 +2857,10 @@ PIXI.InteractionManager.prototype.onMouseUp = function(event)
 PIXI.InteractionManager.prototype.hitTest = function(item, interactionData)
 {
 	var global = interactionData.global;
-	
-	if(item.vcount !== PIXI.visibleCount)return false;
+		
+	if (!item.visible)
+		return false;
+	// if(item.vcount !== PIXI.visibleCount)return false;
 
 	var isSprite = (item instanceof PIXI.Sprite),
 		worldTransform = item.worldTransform,
