@@ -4,7 +4,7 @@
  * Copyright (c) 2012-2014, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2014-02-10
+ * Compiled: 2014-02-18
  *
  * pixi.js is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -2276,7 +2276,7 @@ PIXI.MovieClip.prototype.updateTransform = function()
 
     if(!this.playing)return;
 
-    this.currentFrame += this.animationSpeed;
+	this.currentFrame += this.animationSpeed * this.stage.time.timeScale;
 
     var round = (this.currentFrame + 0.5) | 0;
 
@@ -3660,6 +3660,15 @@ PIXI.Stage = function(backgroundColor)
     //the stage is its own stage
     this.stage = this;
 
+	/**
+	 * time is an instance of the Time class. It can be used to perform frame independent animations.
+	 * This property will be set by the renderer during render.
+	 *
+	 * @property time
+	 * @type {Time}
+	 */
+	this.time = null;
+
     //optimize hit detection a bit
     this.stage.hitArea = new PIXI.Rectangle(0,0,100000, 100000);
 
@@ -4053,11 +4062,11 @@ PIXI.EventTarget = function () {
  * @param width=800 {Number} the width of the renderers view
  * @param height=600 {Number} the height of the renderers view
  * @param [view] {Canvas} the canvas to use as a view, optional 
- * @param [antialias=false] {Boolean} sets antialias (only applicable in webGL chrome at the moment)
- * @param [transparent=false] {Boolean} the transparency of the render view, default false
- *
+ * @param antialias=false {Boolean} sets antialias (only applicable in chrome at the moment)
+ * @param targetFrameRate {Number}=60 target framerate for MovieClip animations and other time based animations
+ * @param minFrameRate {Number}=12 minimum framerate update for MovieClips and other time based animations
  */
-PIXI.autoDetectRenderer = function(width, height, view,antialias,transparent)
+PIXI.autoDetectRenderer = function(width, height, view,transparent, antialias, targetFrameRate, minFrameRate)
 {
     if(!width)width = 800;
     if(!height)height = 600;
@@ -4071,13 +4080,13 @@ PIXI.autoDetectRenderer = function(width, height, view,antialias,transparent)
                                 }
                             } )();
 
+	//console.log(webgl);
+	if( webgl )
+	{
+		return new PIXI.WebGLRenderer(width, height, view, transparent, antialias, targetFrameRate, minFrameRate );
+	}
 
-    if( webgl )
-    {
-        return new PIXI.WebGLRenderer(width, height, view, transparent, antialias);
-    }
-
-    return  new PIXI.CanvasRenderer(width, height, view, transparent);
+	return new PIXI.CanvasRenderer(width, height, view, transparent, targetFrameRate, minFrameRate );
 };
 
 /*
@@ -4250,6 +4259,135 @@ PIXI.PolyK._convex = function(ax, ay, bx, by, cx, cy, sign)
     return ((ay-by)*(cx-bx) + (bx-ax)*(cy-by) >= 0) === sign;
 };
 
+/**
+ * @author Mikko Haapoja http://mikkoh.com/ @MikkoH
+ */
+
+
+/**
+ * The base class for all objects that are rendered on the screen.
+ *
+ * @class DisplayObject
+ * @constructor
+ */
+
+/**
+Time is a class that can be used to ensure that items update independent of framerate. Movieclip's
+framerate will be capped by the timeScale property which is updated during every render call. Each
+renderer will have their own instance of Time which will do the limitting for MovieClips.
+
+@class Time
+@static
+**/
+PIXI.Time = function( targetFrameRate, minFrameRate ) {
+
+	if( targetFrameRate !== undefined ) {
+
+		this.setTargetFrameRate( targetFrameRate );
+	}
+
+	if( minFrameRate !== undefined ) {
+
+		this.setMinFrameRate( minFrameRate );
+	}
+};
+
+PIXI.Time.prototype = {
+
+/**
+ * is the update scale based on the target framerate. So for example if you're expecting something
+ * doing something like x += 10 per frame at 60fps. You can do this: x += 10 * PIXI.Time.timeScale
+ * to ensure that you're moving at a constant rate regardless of framerate. This property is updated
+ * everytime the render function of the renderers is called.
+ *
+ * @property timeScale
+ * @type Number
+ * @default 1
+ */
+	timeScale: 1,
+
+	_tFrameRate: 60,
+	_minFrameRate: 12,
+	_tMilli: 1000 / 60,
+	_minMilli: 1000 / 12,
+	_prevMilli: Date.now(),
+	
+//This is the setter function for the targetFrameRate
+	setTargetFrameRate: function( framerate ) {
+
+		this._tFrameRate = framerate;
+		this._tMilli = 1000 / framerate;
+	},
+
+//This is the getter function for the targetFrameRate
+	getTargetFrameRate: function() {
+
+		return this._tFrameRate;
+	},
+
+//This is the setter function for the minFrameRate
+	setMinFrameRate: function( framerate ) {
+
+		if( framerate > this._tFrameRate ) {
+
+			throw 'Your target minimum framerate must be smaller than your target framerate: ' + this._tFrameRate;
+		} else {
+
+			this._minFrameRate = framerate;
+			this._minMilli = 1000 / framerate;
+		}
+	},
+
+//This is the getter function for the minFrameRate
+	getMinFrameRate: function() {
+
+		return this._minFrameRate;
+	},
+
+//This is the update function which will get called by the renderers
+	update: function() {
+
+		var curMilli = Date.now();
+		var milliDif = curMilli - this._prevMilli;
+
+		if( milliDif > this._minMilli ) {
+
+			milliDif = this._minMilli;
+		}
+
+		this.timeScale = milliDif / this._tMilli;
+
+		this._prevMilli = curMilli;
+	}
+};
+
+/**
+ * Indicates the target frame rate for all MovieClip animations.
+ *
+ * @property targetFrameRate
+ * @type Number
+ * @default 60
+ */
+Object.defineProperty( PIXI.Time.prototype, 'targetFrameRate', {
+
+	get: PIXI.Time.getTargetFrameRate,
+	set: PIXI.Time.setTargetFrameRate
+});
+
+/**
+ * Indicates the minimum frame rate for all MovieClip animations. If for some reason the framerate drops very low
+ * the frame rate of animations will be capped to update at 12 fps. As a note this property is mostly used to
+ * cap the next update if render() has not been called for a long time.
+ *
+ * @property minFrameRate
+ * @type Number
+ * @default 12
+ */
+Object.defineProperty( PIXI.Time.prototype, 'minFrameRate', {
+
+	get: PIXI.Time.getMinFrameRate,
+	set: PIXI.Time.setMinFrameRate
+});
 /**
  * @author Mat Groves http://matgroves.com/ @Doormat23
  */
@@ -5550,9 +5688,11 @@ PIXI.glContexts = []; // this is where we store the webGL contexts for easy acce
  * @param view {HTMLCanvasElement} the canvas to use as a view, optional
  * @param transparent=false {Boolean} If the render view is transparent, default false
  * @param antialias=false {Boolean} sets antialias (only applicable in chrome at the moment)
- *
+ * @param targetFrameRate {Number}=60 target framerate for MovieClip animations and other time based animations
+ * @param minFrameRate {Number}=12 minimum framerate update for MovieClips and other time based animations
+ * 
  */
-PIXI.WebGLRenderer = function(width, height, view, transparent, antialias)
+PIXI.WebGLRenderer = function(width, height, view, transparent, antialias, targetFrameRate, minFrameRate )
 {
     if(!PIXI.defaultRenderer)PIXI.defaultRenderer = this;
 
@@ -5594,6 +5734,15 @@ PIXI.WebGLRenderer = function(width, height, view, transparent, antialias)
     this.view = view || document.createElement( 'canvas' );
     this.view.width = this.width;
     this.view.height = this.height;
+
+	/**
+	 * time is an instance if Time. It will be used to cap the framerate of MovieClip's it can also be used to
+	 * perform framerate independent programmatic animations.
+	 *
+	 * @property time
+	 * @type {Time}
+	 */
+	this.time = new PIXI.Time( targetFrameRate, minFrameRate );
 
     // deal with losing context..
     this.contextLost = this.handleContextLost.bind(this);
@@ -5699,6 +5848,7 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
 {
     if(this.contextLost)return;
 
+	stage.time = this.time;
 
     // if rendering a new stage clear the batches..
     if(this.__stage !== stage)
@@ -5757,6 +5907,8 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
             stage.interactionManager.setTarget(this);
         }
     }
+
+	this.time.update();
 
     /*
     //can simulate context loss in Chrome like so:
@@ -8025,12 +8177,15 @@ PIXI.CanvasTinter.tintMethod = PIXI.CanvasTinter.canUseMultiply ? PIXI.CanvasTin
  *
  * @class CanvasRenderer
  * @constructor
- * @param width=800 {Number} the width of the canvas view
- * @param height=600 {Number} the height of the canvas view
+ * @param width=0 {Number} the width of the canvas view
+ * @param height=0 {Number} the height of the canvas view
  * @param [view] {HTMLCanvasElement} the canvas to use as a view, optional
  * @param [transparent=false] {Boolean} the transparency of the render view, default false
+ * @param targetFrameRate {Number}=60 target framerate for MovieClip animations and other time based animations
+ * @param minFrameRate {Number}=12 minimum framerate update for MovieClips and other time based animations
+ *
  */
-PIXI.CanvasRenderer = function(width, height, view, transparent)
+PIXI.CanvasRenderer = function(width, height, view, transparent, targetFrameRate, minFrameRate )
 {
     PIXI.defaultRenderer = PIXI.defaultRenderer || this;
 
@@ -8146,6 +8301,18 @@ PIXI.CanvasRenderer = function(width, height, view, transparent)
      */
     this.context = this.view.getContext( "2d", { alpha: this.transparent } );
 
+
+	
+	/**
+	 * time is an instance if Time. It will be used to cap the framerate of MovieClip's it can also be used to
+	 * perform framerate independent programmatic animations.
+	 *
+	 * @property time
+	 * @type {Time}
+	 */
+	this.time = new PIXI.Time( targetFrameRate, minFrameRate );
+
+
     this.refresh = true;
     // hack to enable some hardware acceleration!
     //this.view.style["transform"] = "translatez(0)";
@@ -8198,6 +8365,7 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
     PIXI.texturesToUpdate.length = 0;
     PIXI.texturesToDestroy.length = 0;
 
+	stage.time = this.time;
     stage.updateTransform();
 
     this.context.setTransform(1,0,0,1,0,0);
@@ -8231,6 +8399,8 @@ PIXI.CanvasRenderer.prototype.render = function(stage)
     {
         PIXI.Texture.frameUpdates.length = 0;
     }
+
+	this.time.update();
 };
 
 /**

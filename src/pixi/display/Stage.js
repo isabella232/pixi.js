@@ -66,7 +66,7 @@ PIXI.Stage = function(backgroundColor)
 	 *
 	 * @property time
 	 * @type {Time}
-	 */	
+	 */
 	this.time = null;
 
     //optimize hit detection a bit
