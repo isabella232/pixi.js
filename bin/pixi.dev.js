@@ -4,7 +4,7 @@
  * Copyright (c) 2012-2014, Mat Groves
  * http://goodboydigital.com/
  *
- * Compiled: 2014-02-24
+ * Compiled: 2014-03-04
  *
  * pixi.js is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license.php
@@ -1937,7 +1937,7 @@ PIXI.Sprite.prototype._renderCanvas = function(renderSession)
         // allow for trimming
         if (renderSession.roundPixels)
         {
-            context.setTransform(transform.a, transform.c, transform.b, transform.d, transform.tx || 0, transform.ty || 0);
+            context.setTransform(transform.a, transform.c, transform.b, transform.d, transform.tx | 0, transform.ty | 0);
         }
         else
         {
@@ -2210,7 +2210,7 @@ PIXI.SpriteBatch.prototype._renderCanvas = function(renderSession)
            
             if (renderSession.roundPixels)
             {
-                context.setTransform(childTransform.a, childTransform.c, childTransform.b, childTransform.d, childTransform.tx || 0, childTransform.ty || 0);
+                context.setTransform(childTransform.a, childTransform.c, childTransform.b, childTransform.d, childTransform.tx | 0, childTransform.ty | 0);
             }
             else
             {
@@ -3267,7 +3267,7 @@ PIXI.InteractionManager.prototype.update = function()
     var cursor = 'inherit';
     var over = false;
 
-    for (i = 0; i < length; i++)
+    for (i = length-1; i >= 0; i--)
     {
         var item = this.interactiveItems[i];
 
@@ -3329,7 +3329,7 @@ PIXI.InteractionManager.prototype.onMouseMove = function(event)
 
     var length = this.interactiveItems.length;
 
-    for (var i = 0; i < length; i++)
+    for (var i = length-1; i >= 0; i--)
     {
         var item = this.interactiveItems[i];
 
@@ -3362,7 +3362,7 @@ PIXI.InteractionManager.prototype.onMouseDown = function(event)
 
     // while
     // hit test
-    for (var i = 0; i < length; i++)
+    for (var i = length-1; i >= 0; i--)
     {
         var item = this.interactiveItems[i];
 
@@ -3397,7 +3397,7 @@ PIXI.InteractionManager.prototype.onMouseOut = function()
 
     this.interactionDOMElement.style.cursor = 'inherit';
 
-    for (var i = 0; i < length; i++)
+    for (var i = length-1; i >= 0; i--)
     {
         var item = this.interactiveItems[i];
         if(item.__isOver)
@@ -3430,7 +3430,7 @@ PIXI.InteractionManager.prototype.onMouseUp = function(event)
     var length = this.interactiveItems.length;
     var up = false;
 
-    for (var i = 0; i < length; i++)
+    for (var i = length-1; i >= 0; i--)
     {
         var item = this.interactiveItems[i];
 
@@ -3489,6 +3489,20 @@ PIXI.InteractionManager.prototype.hitTest = function(item, interactionData)
 
     interactionData.target = item;
 
+    var length = item.children.length;
+
+    for (var i = length-1; i >= 0; i--)
+    {
+        var tempItem = item.children[i];
+        var hit = this.hitTest(tempItem, interactionData);
+        if(hit)
+        {
+            // hmm.. TODO SET CORRECT TARGET?
+            interactionData.target = item;
+            return true;
+        }
+    }
+
     //a sprite or display object with a hit area defined
     if(item.hitArea && item.hitArea.contains) {
         if(item.hitArea.contains(x, y)) {
@@ -3521,19 +3535,6 @@ PIXI.InteractionManager.prototype.hitTest = function(item, interactionData)
         }
     }
 
-    var length = item.children.length;
-
-    for (var i = 0; i < length; i++)
-    {
-        var tempItem = item.children[i];
-        var hit = this.hitTest(tempItem, interactionData);
-        if(hit)
-        {
-            // hmm.. TODO SET CORRECT TARGET?
-            interactionData.target = item;
-            return true;
-        }
-    }
 
     return false;
 };
@@ -3568,7 +3569,7 @@ PIXI.InteractionManager.prototype.onTouchMove = function(event)
     }
 
     var length = this.interactiveItems.length;
-    for (i = 0; i < length; i++)
+    for (i = length-1; i >= 0; i--)
     {
         var item = this.interactiveItems[i];
         if(item.touchmove)
@@ -3609,7 +3610,7 @@ PIXI.InteractionManager.prototype.onTouchStart = function(event)
 
         var length = this.interactiveItems.length;
 
-        for (var j = 0; j < length; j++)
+        for (var j = length-1; j >= 0; j--)
         {
             var item = this.interactiveItems[j];
 
@@ -3657,7 +3658,7 @@ PIXI.InteractionManager.prototype.onTouchEnd = function(event)
         }
 
         var length = this.interactiveItems.length;
-        for (var j = 0; j < length; j++)
+        for (var j = length-1; j >= 0; j--)
         {
             var item = this.interactiveItems[j];
             var itemTouchData = item.__touchData; // <-- Here!
@@ -4591,7 +4592,6 @@ PIXI.PixiShader = function(gl)
         '}'
     ];
 
-
     /**
     * @property {number} textureCount - A local texture counter for multi-texture shaders.
     */
@@ -4609,7 +4609,6 @@ PIXI.PixiShader = function(gl)
 */
 PIXI.PixiShader.prototype.init = function()
 {
-
     var gl = this.gl;
 
     var program = PIXI.compileProgram(gl, this.vertexSrc || PIXI.PixiShader.defaultVertexSrc, this.fragmentSrc);
@@ -4743,7 +4742,7 @@ PIXI.PixiShader.prototype.initSampler2D = function(uniform)
     var gl = this.gl;
 
     gl.activeTexture(gl['TEXTURE' + this.textureCount]);
-    gl.bindTexture(gl.TEXTURE_2D, uniform.value.baseTexture._glTexture);
+    gl.bindTexture(gl.TEXTURE_2D, uniform.value.baseTexture._glTextures[gl.id]);
 
     //  Extended texture data
     if (uniform.textureData)
@@ -4817,7 +4816,6 @@ PIXI.PixiShader.prototype.syncUniforms = function()
     //  This would probably be faster in an array and it would guarantee key order
     for (var key in this.uniforms)
     {
-
         uniform = this.uniforms[key];
 
         if (uniform.glValueLength === 1)
@@ -4864,7 +4862,6 @@ PIXI.PixiShader.prototype.syncUniforms = function()
 /**
 * Destroys the shader
 * @method destroy
-*
 */
 PIXI.PixiShader.prototype.destroy = function()
 {
@@ -4876,7 +4873,7 @@ PIXI.PixiShader.prototype.destroy = function()
 };
 
 /**
-*
+* The Default Vertex shader source
 * @property defaultVertexSrc
 * @type String
 */
@@ -4900,10 +4897,6 @@ PIXI.PixiShader.defaultVertexSrc = [
     '   vColor = vec4(color * aColor.x, aColor.x);',
     '}'
 ];
-
-
-
-
 
 /**
  * @author Mat Groves http://matgroves.com/ @Doormat23
@@ -6652,7 +6645,7 @@ PIXI.WebGLSpriteBatch = function(gl)
      * @property size
      * @type Number
      */
-    this.size = 10000;//Math.pow(2, 16) /  this.vertSize;
+    this.size = 2000;//Math.pow(2, 16) /  this.vertSize;
 
     //the total number of floats in our batch
     var numVerts = this.size * 4 *  this.vertSize;
@@ -9903,7 +9896,7 @@ PIXI.Rope.prototype.setTexture = function(texture)
  * A tiling sprite is a fast way of rendering a tiling image
  *
  * @class TilingSprite
- * @extends DisplayObjectContainer
+ * @extends Sprite
  * @constructor
  * @param texture {Texture} the texture of the tiling sprite
  * @param width {Number}  the width of the tiling sprite
@@ -9920,6 +9913,7 @@ PIXI.TilingSprite = function(texture, width, height)
      * @type Number
      */
     this.width = width || 100;
+
     /**
      * The height of the tiling sprite
      *

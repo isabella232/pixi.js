@@ -189,7 +189,7 @@ module.exports = function(grunt) {
         watch: {
             scripts: {
                 files: ['<%= dirs.src %>/**/*.js'],
-                tasks: ['concat'],
+                tasks: ['concat_sourcemap'],
                 options: {
                     spawn: false,
                 }
@@ -216,5 +216,5 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default', ['build', 'test']);
 
-    grunt.registerTask('debug-watch', ['concat', 'watch']);
+    grunt.registerTask('debug-watch', ['concat_sourcemap', 'watch']);
 };
